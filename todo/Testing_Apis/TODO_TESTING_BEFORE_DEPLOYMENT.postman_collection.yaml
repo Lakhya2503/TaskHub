@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: TODO API
+  version: 1.0.0
+  description: API documentation for Todo Application
+
+servers:
+  - url: http://localhost:5000/api/v1/todo
+
+tags:
+  - name: Authentication
+  - name: Todo
+  - name: Todo-Item
+
+paths:
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullName
+                - email
+                - password
+                - phoneNumber
+              properties:
+                fullName:
+                  type: string
+                  example: laxman shinde
+                email:
+                  type: string
+                  format: email
+                  example: shindelaxman@gmail.com
+                password:
+                  type: string
+                  example: Laxman@2509
+                phoneNumber:
+                  type: string
+                  example: "9579731172"
+      responses:
+        "201":
+          description: User registered successfully
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: 25092002shindelaxman@gmail.com
+                password:
+                  type: string
+                  example: Laxman@2509
+      responses:
+        "200":
+          description: User logged in successfully
+
+  /auth/logout:
+    get:
+      tags:
+        - Authentication
+      summary: Logout User
+      responses:
+        "200":
+          description: User logged out successfully
+
+  /auth/get-me:
+    get:
+      tags:
+        - Authentication
+      summary: Get Current User
+      responses:
+        "200":
+          description: Current user details fetched successfully
+
+  /todo/create-todo:
+    post:
+      tags:
+        - Todo
+      summary: Create Todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  example: Wensday todo
+      responses:
+        "201":
+          description: Todo created successfully
+
+  /todo/fetch-todo:
+    get:
+      tags:
+        - Todo
+      summary: Fetch All Todos
+      responses:
+        "200":
+          description: Todos fetched successfully
+
+  /todo/update-todo-name/{todoId}:
+    put:
+      tags:
+        - Todo
+      summary: Update Todo Title
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 6a05a0eef53435ed6ebb29cd
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  example: he this is monday doctor
+      responses:
+        "200":
+          description: Todo title updated successfully
+
+  /todo-item/create-todo-item/{todoId}:
+    post:
+      tags:
+        - Todo-Item
+      summary: Create Todo Item
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 6a05a67b9b92bf99583fc34d
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - context
+              properties:
+                context:
+                  type: string
+                  example: day and weeks
+      responses:
+        "201":
+          description: Todo item created successfully
+
+  /todo-item/complete-todo-item/{itemId}:
+    put:
+      tags:
+        - Todo-Item
+      summary: Complete Todo Item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 6a05a1fcf53435ed6ebb29d2
+      responses:
+        "200":
+          description: Todo item marked as completed
+
+  /todo-item/delete-todo-item/{itemId}:
+    delete:
+      tags:
+        - Todo-Item
+      summary: Delete Todo Item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 6a05a1fcf53435ed6ebb29d2
+      responses:
+        "200":
+          description: Todo item deleted successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
