@@ -3,7 +3,7 @@
 // ===========================================
 
 import axios from "axios";
-import { toast } from 'react-toastify'
+import { toast } from 'react-toastify';
 
 // =======================
 // LocalStorage Utility
@@ -58,7 +58,7 @@ export class LocalStorage {
 // =======================
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_SERVER_URI || "http://localhost:5000/api/v1/todo",
-  withCredentials: true, // send httpOnly cookies
+  withCredentials: true, // Important: Send cookies with requests
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -69,16 +69,8 @@ const apiClient = axios.create({
 // Request Interceptor
 // =======================
 apiClient.interceptors.request.use((config) => {
-  const token = LocalStorage.get("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  // Extract workspace ID from current URL and send as header for role-based filtering
-  const match = window.location.pathname.match(/\/workspace\/([a-f0-9]{24})/i);
-  if (match) {
-    config.headers['x-workspace-id'] = match[1];
-  }
+  // Cookies are sent automatically with withCredentials: true
+  // No need to manually add Authorization header since server uses cookies
 
   // Let browser handle FormData content-type automatically
   if (config.data instanceof FormData) {
@@ -94,31 +86,10 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-
-    // If 401 and request not retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // Refresh token endpoint (httpOnly cookie sent automatically)
-        const refreshRes = await apiClient.post("/refresh-token");
-        const newAccessToken = refreshRes.data.accessToken;
-
-        if (!newAccessToken) throw new Error("Refresh token failed");
-
-        // Save new accessToken
-        LocalStorage.set("accessToken", newAccessToken);
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed → clear storage + redirect to login
-        LocalStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(refreshError);
-      }
+    // Handle 401 errors by redirecting to login
+    if (error.response?.status === 401) {
+      LocalStorage.clear();
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);

@@ -1,29 +1,30 @@
-import React from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Dashboard from './components/Dashboard'
-import Register from './components/auth/Register'
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 import TodoDashboard from './components/TodoDashboard';
-import Todo from './components/card/Todo';
 
 const App = () => {
   return (
-    <>
-        <div className="min-h-screen max-h-fit bg-zinc-700">
-                <BrowserRouter>
-                      <Routes>
-                          <Route path="/" element={<Dashboard/>} />
-                          <Route path="/login" element={<Login/>} />
-                          <Route path="/register" element={<Register/>} />
+    <div className="min-h-screen">
+      <Routes>
+        <Route path="/" element={<Dashboard/>} />
+        <Route path="/login" element={<Login/>} />
+        <Route path="/register" element={<Register/>} />
 
-                          <Route path="/todos" element={<TodoDashboard/>} >
-                                <Route path="todo" element={<Todo/>} />
-                          </Route>
+        <Route
+          path="/todos"
+          element={
+            <ProtectedRoute>
+              <TodoDashboard/>
+            </ProtectedRoute>
+          }
+        />
 
-                    </Routes>
-              </BrowserRouter>
-        </div>
-    </>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   )
 }
 

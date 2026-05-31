@@ -1,13 +1,14 @@
+import uploadCloudinary from '../config/uploadCloudinary.js';
 import User from '../models/auth.model.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import uploadCloudinary  from '../config/uploadCloudinary.js'
 // import { removeRefreshTokenAndPassword, // await requiredField } from '../utils/helper.js';
 
 const option = {
   httpOnly : true,
-  secured : true
+  secure : process.env.NODE_ENV === 'production',
+  sameSite: 'lax'
 }
 
 const generateAccessRefreshToken = async(userId) => {
@@ -30,14 +31,13 @@ const generateAccessRefreshToken = async(userId) => {
 
 const registerUser = asyncHandler(async(req,res)=>{
 
-
     const { fullName, email, password, phoneNumber } = req.body
 
-    // await requiredField([fullName,email,password,phoneNumber])
-
+    if(!fullName || !email || !password) {
+      throw new ApiError(400, "Full name, email and password are required")
+    }
 
     const avatar = req.files?.avatar?.[0]?.path
-    // console.log(avatar)
 
     let avatarURI;
 
@@ -48,52 +48,49 @@ const registerUser = asyncHandler(async(req,res)=>{
     const alreadyExist = await User.findOne({email})
 
     if(alreadyExist) {
-      console.log(alreadyExist)
-      throw new ApiError(400 ,`${alreadyExist.role} already exist`)
+      throw new ApiError(400 ,`User already exists with this email`)
     }
-
 
     const user = await User.create({
           fullName,
           password,
           email,
-          avatar : avatarURI ? avatarURI.url : avatarURI,
+          avatar : avatarURI ? avatarURI.url : "",
           phoneNumber,
         })
 
-      // await removeRefreshTokenAndPassword(user._id)
-
-    return res.status(200).json(new ApiResponse(201, {}, `${user.fullName} your created Successfully`))
+    return res.status(201).json(new ApiResponse(201, {}, `${user.fullName}, you are registered successfully. Please login.`))
 })
 
 const loginUser = asyncHandler(async(req,res)=>{
 
   const { email, password } = req.body
+  console.log(req.body);
 
-  // await requiredField([email,password])
+  if(!email || !password) {
+    throw new ApiError(400, "Email and password are required")
+  }
 
-    const user = await User.findOne({email})
-    console.log(user);
+  const user = await User.findOne({email})
 
-
-    if(!user) {
-      throw new ApiError(401, "User can't exist with this email")
-    }
+  if(!user) {
+    throw new ApiError(401, "User doesn't exist with this email")
+  }
 
   const passwordValid = await user.isPasswordCorrect(password)
 
   if(!passwordValid) {
-    throw new ApiError(403, "Please check Credientials")
+    throw new ApiError(403, "Invalid credentials")
   }
 
   const { refreshToken, accessToken } = await generateAccessRefreshToken(user._id)
 
-  await User.findById(user._id).select("-password -refreshToken")
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
   return res.status(200)
   .cookie("accessToken" , accessToken, option)
   .cookie("refreshToken" , refreshToken, option)
-  .json(new ApiResponse(200, user , `${user.fullName} logged in successfully`))
+  .json(new ApiResponse(200, loggedInUser , `${user.fullName} logged in successfully`))
 })
 
 const logoutUser = asyncHandler(async(req,res)=>{
@@ -258,15 +255,6 @@ const googleLoginCallback = asyncHandler(async (req, res) => {
 });
 
 export {
-    registerUser,
-    loginUser,
-    logoutUser,
-    verifyEmail,
-    googleLoginCallback,
-    currentUser,
-    updateAvatar,
-    allUsers,
-    updateUserFiled,
-    verifyEmailRequest,
-    changeCurrentPassword
+    allUsers, changeCurrentPassword, currentUser, googleLoginCallback, loginUser,
+    logoutUser, registerUser, updateAvatar, updateUserFiled, verifyEmail, verifyEmailRequest
 };

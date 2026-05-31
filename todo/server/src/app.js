@@ -1,18 +1,21 @@
-import express from 'express'
 import cookieParser from 'cookie-parser';
-import cors  from 'cors'
+import cors from 'cors';
+import express from 'express';
 // import passport from 'passport';
-import { ENV } from './utils/ENV.js'
 import ApiResponse from './utils/ApiResponse.js';
+import { ENV } from './utils/ENV.js';
 
 
 
 const app = express()
 
 
-app.use(express.json({limit: "1mb"}))
+app.use(express.json({limit: "20kb"}))
+app.use(express.urlencoded({ extended: true, limit: "20kb" }))
 app.use(cookieParser())
-app.use(cors({methods : ["GET", "POST", "PATCH", "PUT"],  credentials : true,
+app.use(cors({
+  methods : ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  credentials : true,
   origin : ENV.CORS_ORIGIN
 }))
 app.use(express.static("public"))
@@ -22,9 +25,9 @@ app.use(express.static("public"))
 
 
 // ?? ---------  router import---------
-import AuthRouter from './routes/auth.route.js'
-import TodoRouter from './routes/todo.route.js'
-import TodoItemRouter from './routes/todoItem.route.js'
+import AuthRouter from './routes/auth.route.js';
+import TodoRouter from './routes/todo.route.js';
+import TodoItemRouter from './routes/todoItem.route.js';
 
 
 // ?? ---------  router ---------

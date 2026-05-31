@@ -1,23 +1,23 @@
 import { Loader } from "lucide-react";
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-  useRef,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-  currentUser,
-  commonLogin,
-  loggedOutUser,
-  registerAdmin,
-  updateUserProfile,
-  changeCurrentPassword,
-  updateUserAvatar,
+    changeCurrentPassword,
+    commonLogin,
+    currentUser,
+    loggedOutUser,
+    registerAdmin,
+    updateUserAvatar,
+    updateUserProfile,
 } from "../api/index";
 
 import { LocalStorage } from "../utils";
@@ -88,10 +88,7 @@ export const AuthProvider = ({ children }) => {
 
       const res = await currentUser();
 
-      const userData =
-        res?.data?.data?.user ||
-        res?.data?.data ||
-        null;
+      const userData = res?.data?.data || res?.data || null;
 
       if (userData) {
         persistUser(userData);
@@ -168,21 +165,29 @@ export const AuthProvider = ({ children }) => {
 
     try {
 
-      await commonLogin(payload);
+      const loginResponse = await commonLogin(payload);
 
-      const userData = await fetchCurrentUser();
+      // Extract user data from login response
+      const userData = loginResponse?.data?.data || loginResponse?.data;
 
-      if (!userData) throw new Error("User fetch failed");
+      if (userData) {
+        persistUser(userData);
+      } else {
+        // Fallback: fetch user data
+        await fetchCurrentUser();
+      }
 
       return { success: true };
 
+    } catch (error) {
+      throw error;
     } finally {
 
       setLoading(false);
 
     }
 
-  }, [fetchCurrentUser, navigate]);
+  }, [fetchCurrentUser, persistUser]);
 
   // =========================
   // REGISTER
