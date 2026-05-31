@@ -1,0 +1,28 @@
+name : Deploy on VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    deploy:
+       runs-on: ubuntu-latest
+
+
+       steps:
+         - name : Checkout Code
+           uses : action/checkout@4
+
+         - name : Deploy via SSH
+           uses:  appleboy/ssh-action@1.0.3
+           with:
+            host : ${{ secrets.SSH_HOST}}
+            username : ${{ secret.VPS_USER }}
+            key : ${{ secets.SSH_KEY }}
+
+vps login
+terminal
+root folder - clone - access
+git pull
+docker compose up -d
