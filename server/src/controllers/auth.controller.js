@@ -32,6 +32,7 @@ const generateAccessRefreshToken = async(userId) => {
 const registerUser = asyncHandler(async(req,res)=>{
 
     const { fullName, email, password, phoneNumber } = req.body
+    console.log("req.",req.body)
 
     if(!fullName || !email || !password) {
       throw new ApiError(400, "Full name, email and password are required")
@@ -65,7 +66,6 @@ const registerUser = asyncHandler(async(req,res)=>{
 const loginUser = asyncHandler(async(req,res)=>{
 
   const { email, password } = req.body
-  console.log(req.body);
 
   if(!email || !password) {
     throw new ApiError(400, "Email and password are required")
@@ -90,7 +90,11 @@ const loginUser = asyncHandler(async(req,res)=>{
   return res.status(200)
   .cookie("accessToken" , accessToken, option)
   .cookie("refreshToken" , refreshToken, option)
-  .json(new ApiResponse(200, loggedInUser , `${user.fullName} logged in successfully`))
+  .json(new ApiResponse(200, {
+    "accessToken" : accessToken,
+    "refreshToken" : refreshToken,
+    user : loggedInUser
+  } , `${user.fullName} logged in successfully`))
 })
 
 const logoutUser = asyncHandler(async(req,res)=>{

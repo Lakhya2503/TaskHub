@@ -16,7 +16,10 @@ app.use(cookieParser())
 app.use(cors({
   methods : ["GET", "POST", "PATCH", "PUT", "DELETE"],
   credentials : true,
-  origin : ENV.CORS_ORIGIN
+  origin : [
+    ENV.CORS_ORIGIN,
+    "http://localhost:5173"
+  ]
 }))
 app.use(express.static("public"))
 // app.use(passport())
