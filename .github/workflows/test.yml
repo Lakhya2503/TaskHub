@@ -7,10 +7,6 @@ jobs:
       - name: Get code
         uses : actions/checkout@v6
       - name: Install dependencies (root)
-        run: npm ci
-      - name: Install dependencies (Client)
-        run: cd client && npm ci
-      - name: Install dependencies (Server)
-        run: cd server && npm ci
+        run: npm ci --workspaces
       - name : Run project
         run: npm run dev
