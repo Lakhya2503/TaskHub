@@ -1,28 +1,22 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import Dashboard from './components/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import Home from './components/Dashboard';
 import TodoDashboard from './components/TodoDashboard';
 
 const App = () => {
   return (
     <div className="min-h-screen">
       <Routes>
-        <Route path="/" element={<Dashboard/>} />
+        <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login/>} />
         <Route path="/register" element={<Register/>} />
 
         <Route
           path="/todos"
           element={
-            <ProtectedRoute>
-              <TodoDashboard/>
-            </ProtectedRoute>
-          }
+              <TodoDashboard/>}
         />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )

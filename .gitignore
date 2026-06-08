@@ -24,6 +24,10 @@ dist-ssr
 *.sln
 *.sw?
 
+<<<<<<< HEAD
 // docker file
 
+=======
+// deploye file
+>>>>>>> 92b38227dc7910c1f89eabf122107c1bbcd2e5da
 docker.deploy.md
